@@ -44,10 +44,9 @@ def setup_scene():
 
     # Rigid Object
     cone_cfg = RigidObjectCfg(
-        prim_path="/World/Origin.*/Cone",
-        spawn=sim_utils.ConeCfg(
+        prim_path="/World/Origin.*/Sphere",
+        spawn=sim_utils.SphereCfg(
             radius=0.1,
-            height=0.2,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(),
             mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -66,30 +65,32 @@ def run_simulation(sim: sim_utils.SimulationContext, entities: RigidObject, orig
     sim_time = 0.0
     count = 0
 
-    # 1. Get the default state for each object
-    root_state = entities.data.default_root_state.clone()
-
-    # 2. Change the position of cylinders for matching each origin
-    root_state[:, :3] += torch.tensor(origins)
-
-    # 3. Write root state to simulation
-    entities.write_root_state_to_sim(root_state)
-
-    # 4. Reset buffers
-    entities.reset()
-
     while simulation_app.is_running():
-    # TODO HERE
+
+        if count % 250 == 0:
+            
+            # 1. Get the default state for each object
+            root_state = entities.data.default_root_state.clone()
+
+            # 2. Change the position of cylinders for matching each origin
+            root_state[:, :3] += torch.tensor(origins) + math_utils.sample_cylinder(
+            radius=0.1, h_range=(0.25, 0.5),
+            size=entities.num_instances,
+            device=entities.device
+            )
+
+            # 3. Write root state to simulation
+            entities.write_root_state_to_sim(root_state)
+
+            # 4. Reset buffers
+            entities.reset()
+
+        entities.update(sim_dt)
+
         # perform step
         sim.step()
         sim_time += sim_dt
         count += 1
-
-        # update buffers
-        entities.update(sim_dt)
-
-        if count == 250:
-            
 
 
 def main():
