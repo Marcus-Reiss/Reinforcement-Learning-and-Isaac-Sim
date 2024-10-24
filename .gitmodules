@@ -1,0 +1,3 @@
+[submodule "code_rl/machine_learning_examples"]
+	path = code_rl/machine_learning_examples
+	url = https://github.com/lazyprogrammer/machine_learning_examples.git
