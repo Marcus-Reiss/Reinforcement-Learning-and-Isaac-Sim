@@ -1,0 +1,3 @@
+[submodule "code_rl/repo-lazyprog"]
+	path = code_rl/repo-lazyprog
+	url = git@github.com:lazyprogrammer/machine_learning_examples.git
