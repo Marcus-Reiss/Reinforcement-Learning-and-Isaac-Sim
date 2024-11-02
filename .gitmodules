@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 [submodule "code_rl/repo-lazyprog"]
 	path = code_rl/repo-lazyprog
 	url = git@github.com:lazyprogrammer/machine_learning_examples.git
+=======
+[submodule "code_rl/machine_learning_examples"]
+	path = code_rl/machine_learning_examples
+	url = https://github.com/lazyprogrammer/machine_learning_examples.git
+>>>>>>> eb9f6d4bab4b938418a4f71bc5d017293e7928d9
