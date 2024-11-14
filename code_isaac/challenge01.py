@@ -84,7 +84,6 @@ def run_simulation(sim: sim_utils.SimulationContext, entities: RigidObject, orig
 
             # 4. Reset buffers
             entities.reset()
-<<<<<<< HEAD:code_isaac/class01.py
 
         entities.update(sim_dt)
 
@@ -93,17 +92,6 @@ def run_simulation(sim: sim_utils.SimulationContext, entities: RigidObject, orig
         sim_time += sim_dt
         count += 1
 
-=======
-
-        # update buffers
-        entities.update(sim_dt)
-
-        # perform step
-        sim.step()
-        sim_time += sim_dt
-        count += 1
-        
->>>>>>> 8c768d3a53136f048495b6a48bf76524c88fae30:code_isaac/challenge01.py
 
 def main():
     """Main function."""
