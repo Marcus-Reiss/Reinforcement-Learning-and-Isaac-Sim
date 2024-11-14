@@ -24,12 +24,13 @@ from omni.isaac.lab.sim import SimulationContext
 
 def setup_scene():
     """ Include here all code for setup the objects """
+
+    # Prim-path
+    prim_path = "/World/defaultGroundPlane"
+
     # Ground-plane
     cfg = sim_utils.GroundPlaneCfg()
-
-    # Spawn the object:
-    prim_path = "/World/defaultGroundPlane"
-    sim_utils.spawn_from_usd(prim_path, cfg)
+    cfg.func(prim_path,cfg)
 
     # Lights
     cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.8, 0.8, 0.8))
@@ -37,16 +38,19 @@ def setup_scene():
 
     # Create separate groups called "Origin1", "Origin2", "Origin3", "Origin4"
     origins = [[0.25, 0.25, 0.],[-.25, 0.25, 0.], [0.25, -.25, 0.], [-.25, -.25, 0.]]
-    prim_utils.create_prim(f"/World/Origin1", "Xform", translation=[0.25, 0.25, 0.])
-    prim_utils.create_prim(f"/World/Origin2", "Xform", translation=[-.25, 0.25, 0.])
-    prim_utils.create_prim(f"/World/Origin3", "Xform", translation=[0.25, -.25, 0.])
-    prim_utils.create_prim(f"/World/Origin4", "Xform", translation=[-.25, -.25, 0.])
+    # prim_utils.create_prim(f"/World/Origin1", "Xform", translation=[0.25, 0.25, 0.])
+    # prim_utils.create_prim(f"/World/Origin2", "Xform", translation=[-.25, 0.25, 0.])
+    # prim_utils.create_prim(f"/World/Origin3", "Xform", translation=[0.25, -.25, 0.])
+    # prim_utils.create_prim(f"/World/Origin4", "Xform", translation=[-.25, -.25, 0.])
+    for k, origin in enumerate(origins):
+        prim_utils.create_prim(f"/World/Origin{k + 1}", "Xform", translation=origin)
 
     # Rigid Object
     cone_cfg = RigidObjectCfg(
-        prim_path="/World/Origin.*/Sphere",
-        spawn=sim_utils.SphereCfg(
-            radius=0.1,
+        prim_path="/World/Origin[1-3]/Cone",
+        spawn=sim_utils.ConeCfg(
+            radius=0.2,
+            height=0.5,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(),
             mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -55,6 +59,15 @@ def setup_scene():
             init_state=RigidObjectCfg.InitialStateCfg(),
     )
     cone_object = RigidObject(cfg=cone_cfg)
+
+    # Adding a blue deformable cuboid
+    cfg_cuboid_deformable = sim_utils.MeshCuboidCfg(
+        size=(0.5, 0.5, 0.5),
+        deformable_props=sim_utils.DeformableBodyPropertiesCfg(),
+        visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 0.0, 1.0)),
+        physics_material=sim_utils.DeformableBodyMaterialCfg(),
+    )
+    cfg_cuboid_deformable.func("/World/Origin4/CuboidDeformable", cfg_cuboid_deformable, translation=origins[3])
 
     return cone_object, origins
 
@@ -72,12 +85,19 @@ def run_simulation(sim: sim_utils.SimulationContext, entities: RigidObject, orig
             # 1. Get the default state for each object
             root_state = entities.data.default_root_state.clone()
 
-            # 2. Change the position of cylinders for matching each origin
-            root_state[:, :3] += torch.tensor(origins) + math_utils.sample_cylinder(
-            radius=0.1, h_range=(0.25, 0.5),
-            size=entities.num_instances,
+            # 2. Change the position of cones for matching each origin
+            root_state[:, :3] += torch.tensor(origins[:3]) + math_utils.sample_cylinder(
+            radius=0.1, h_range=(1.0, 2.0),
+            size=3,
             device=entities.device
             )
+
+            # Trying to do the same for the cuboid
+            # root_state[:, :3] += torch.tensor(origins[3]) + math_utils.sample_cylinder(
+            # radius=0.1, h_range=(1.0, 2.0),
+            # size=1,
+            # device=entities.device
+            # )
 
             # 3. Write root state to simulation
             entities.write_root_state_to_sim(root_state)
