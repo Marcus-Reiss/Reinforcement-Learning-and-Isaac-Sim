@@ -12,7 +12,7 @@
 
 """
 
-"""Launch Isaac Sim Simulator first."""
+"""Launch Isaac Sim Simulator first.""" 
 
 
 import argparse
